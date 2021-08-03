@@ -1,15 +1,15 @@
-interface ILocalStorageValueParams {
+interface ILocalStorageValueParams<T> {
     key: string;
-    rule?: (value: any) => boolean;
+    rule?: (value: T) => boolean;
     consoleMessages?: boolean;
 }
 
-export class LocalStorageValue {
+export class LocalStorageValue<T> {
     private readonly key: string;
-    private readonly rule?: (value: any) => boolean;
+    private readonly rule?: (value: T) => boolean;
     private readonly consoleMessages?: boolean;
 
-    constructor(parameters: ILocalStorageValueParams) {
+    constructor(parameters: ILocalStorageValueParams<T>) {
         this.key = parameters.key;
         this.rule = parameters.rule;
         if (parameters.consoleMessages) {
@@ -20,30 +20,30 @@ export class LocalStorageValue {
     public removeValue: () => void = () =>
         window.localStorage.removeItem(this.key);
 
-    public set(value: any) {
+    public set(value: T) {
         let valueInput = value;
         if (this.rule) {
             if (this.rule(valueInput)) {
                 try {
-                    valueInput = JSON.stringify(value);
+                    valueInput = JSON.stringify(value) as any;
                 } catch (e) {
                     if (this.consoleMessages) {
                         this.messageForDevs(`LOCAL STORAGE PARSE ERROR - '${valueInput}' couldn't be parsed to string!`);
                     }
                 }
-                window.localStorage.setItem(this.key, valueInput);
+                window.localStorage.setItem(this.key, valueInput as any);
             } else {
                 if (this.consoleMessages) {
                     this.messageForDevs(`LOCAL STORAGE SET OPERATION - Rule for value: '${valueInput}' with key: ${this.key} has been violated!`);
                 }
             }
         } else {
-            valueInput = JSON.stringify(value);
-            window.localStorage.setItem(this.key, valueInput);
+            valueInput = JSON.stringify(value) as any;
+            window.localStorage.setItem(this.key, valueInput as any);
         }
     }
 
-    public get(): any {
+    public get(): T | undefined {
         let locValue = window.localStorage.getItem(this.key);
         if (locValue === undefined || locValue === null) {
             return;
@@ -51,6 +51,19 @@ export class LocalStorageValue {
 
         try {
             locValue = JSON.parse(locValue);
+
+            if (this.rule) {
+                if (this.rule(locValue as any)) {
+                    return locValue as any;
+                } else {
+                    window.localStorage.removeItem(this.key);
+                    if (this.consoleMessages) {
+                        this.messageForDevs(`LOCAL STORAGE GET OPERATION - Rule for value: '${locValue}' with key: ${this.key} has been violated!`);
+                    }
+                    return;
+                }
+            }
+
         } catch (e) {
             if (this.consoleMessages) {
                 this.messageForDevs(`LOCAL STORAGE PARSE ERROR - '${locValue}' couldn't be parsed!`);
@@ -58,18 +71,7 @@ export class LocalStorageValue {
             window.localStorage.removeItem(this.key);
         }
 
-        if (this.rule) {
-            if (this.rule(locValue)) {
-                return locValue;
-            } else {
-                window.localStorage.removeItem(this.key);
-                if (this.consoleMessages) {
-                    this.messageForDevs(`LOCAL STORAGE GET OPERATION - Rule for value: '${locValue}' with key: ${this.key} has been violated!`);
-                }
-                return;
-            }
-        }
-        return locValue;
+        return locValue as any;
     }
 
     messageForDevs(message: string): void {
