@@ -1,0 +1,17 @@
+{
+  "name": "@eliassmith/local-storage-util",
+  "version": "1.0.1",
+  "description": "",
+  "main": "dist/local-storage-util.js",
+  "types": "dist/local-storage-util.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepare": "npm run build"
+  },
+  "keywords": [],
+  "author": "monisnap-jason",
+  "license": "ISC"
+}
