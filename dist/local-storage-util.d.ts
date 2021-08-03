@@ -1,16 +1,16 @@
-interface ILocalStorageValueParams {
+interface ILocalStorageValueParams<T> {
     key: string;
-    rule?: (value: any) => boolean;
+    rule?: (value: T) => boolean;
     consoleMessages?: boolean;
 }
-export declare class LocalStorageValue {
+export declare class LocalStorageValue<T> {
     private readonly key;
     private readonly rule?;
     private readonly consoleMessages?;
-    constructor(parameters: ILocalStorageValueParams);
+    constructor(parameters: ILocalStorageValueParams<T>);
     removeValue: () => void;
-    set(value: any): void;
-    get(): any;
+    set(value: T): void;
+    get(): T | undefined;
     messageForDevs(message: string): void;
 }
 export {};

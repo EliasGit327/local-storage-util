@@ -45,24 +45,24 @@ var LocalStorageValue = /** @class */ (function () {
         }
         try {
             locValue = JSON.parse(locValue);
+            if (this.rule) {
+                if (this.rule(locValue)) {
+                    return locValue;
+                }
+                else {
+                    window.localStorage.removeItem(this.key);
+                    if (this.consoleMessages) {
+                        this.messageForDevs("LOCAL STORAGE GET OPERATION - Rule for value: '" + locValue + "' with key: " + this.key + " has been violated!");
+                    }
+                    return;
+                }
+            }
         }
         catch (e) {
             if (this.consoleMessages) {
                 this.messageForDevs("LOCAL STORAGE PARSE ERROR - '" + locValue + "' couldn't be parsed!");
             }
             window.localStorage.removeItem(this.key);
-        }
-        if (this.rule) {
-            if (this.rule(locValue)) {
-                return locValue;
-            }
-            else {
-                window.localStorage.removeItem(this.key);
-                if (this.consoleMessages) {
-                    this.messageForDevs("LOCAL STORAGE GET OPERATION - Rule for value: '" + locValue + "' with key: " + this.key + " has been violated!");
-                }
-                return;
-            }
         }
         return locValue;
     };
